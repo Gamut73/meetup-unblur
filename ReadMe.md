@@ -1,0 +1,1 @@
+# It's in my memory, so surely it’s mine to do with as I please.

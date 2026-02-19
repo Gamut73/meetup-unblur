@@ -1,0 +1,5 @@
+.blur-sm,
+[class*="blur-"] {
+  filter: none !important;
+  -webkit-filter: none !important;
+}

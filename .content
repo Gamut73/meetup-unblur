@@ -1,0 +1,95 @@
+// Function to remove blur classes from all elements
+function removeBlurClasses() {
+  const blurClasses = ['blur-sm', 'blur-m'];
+  
+  // Method 1: Remove classes directly
+  blurClasses.forEach(blurClass => {
+    const elements = document.querySelectorAll(`.${blurClass}`);
+    elements.forEach(element => {
+      element.classList.remove(blurClass);
+    });
+  });
+  
+  // Method 2: Also check and remove from class attribute directly
+  // (handles cases where classList might not work as expected)
+  document.querySelectorAll('[class*="blur-sm"], [class*="blur-m"]').forEach(element => {
+    element.className = element.className
+      .replace(/\bblur-sm\b/g, '')
+      .replace(/\bblur-m\b/g, '')
+      .trim();
+  });
+}
+
+// Function to remove blur via inline styles as well
+function removeBlurStyles() {
+  document.querySelectorAll('[style*="blur"]').forEach(element => {
+    element.style.filter = 'none';
+  });
+}
+
+// Inject CSS to override any blur classes globally
+function injectAntiBlurCSS() {
+  const style = document.createElement('style');
+  style.id = 'meetup-unblur-styles';
+  style. textContent = `
+    .blur-sm,
+    .blur-m,
+    [class*="blur-sm"],
+    [class*="blur-m"] {
+      filter: none !important;
+      -webkit-filter: none !important;
+    }
+  `;
+  
+  if (!document.getElementById('meetup-unblur-styles')) {
+    document.head.appendChild(style);
+  }
+}
+
+// Main function to run all unblur methods
+function unblur() {
+  injectAntiBlurCSS();
+  removeBlurClasses();
+  removeBlurStyles();
+}
+
+// Run immediately
+unblur();
+
+// Run again after a short delay (for dynamically loaded content)
+setTimeout(unblur, 500);
+setTimeout(unblur, 1500);
+setTimeout(unblur, 3000);
+
+// Also observe for dynamically added content
+const observer = new MutationObserver((mutations) => {
+  let shouldUnblur = false;
+  
+  mutations.forEach((mutation) => {
+    if (mutation.addedNodes.length > 0 || mutation.type === 'attributes') {
+      shouldUnblur = true;
+    }
+  });
+  
+  if (shouldUnblur) {
+    unblur();
+  }
+});
+
+// Start observing the document for changes
+observer.observe(document.body || document.documentElement, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['class', 'style']
+});
+
+// Also run when DOM is fully ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', unblur);
+}
+
+// And on window load
+window.addEventListener('load', unblur);
+
+console.log('Meetup Unblur extension loaded');
